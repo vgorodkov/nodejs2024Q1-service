@@ -50,6 +50,7 @@ export class TrackService {
     tracks.splice(trackIndex, 1);
 
     const favIndex = favs.tracks.findIndex((favId) => favId === id);
+
     if (favIndex !== -1) {
       favs.tracks.splice(favIndex, 1);
     }

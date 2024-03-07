@@ -40,14 +40,17 @@ export class AlbumService {
 
   remove(id: string) {
     const albumIndex = findEntityIndexById(id, albums);
+
     const trackIndex = tracks.findIndex((track) => track.albumId === id);
     if (trackIndex !== -1) {
       tracks[trackIndex].albumId = null;
     }
+
     const favIndex = favs.albums.findIndex((favId) => favId === id);
     if (favIndex !== -1) {
       favs.albums.splice(favIndex, 1);
     }
+
     albums.splice(albumIndex, 1);
     return;
   }

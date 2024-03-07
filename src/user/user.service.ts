@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { users } from 'src/data/db';
 import { User } from './entities/user.entity';
-import { v4, validate } from 'uuid';
+import { v4 } from 'uuid';
 import { findEntityById, findEntityIndexById } from 'src/utils/findEntity';
 
 @Injectable()
