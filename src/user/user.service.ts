@@ -9,28 +9,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { users } from 'src/data/db';
 import { User } from './entities/user.entity';
 import { v4, validate } from 'uuid';
+import { findEntityById, findEntityIndexById } from 'src/utils/findEntity';
 
 @Injectable()
 export class UserService {
-  private findUserById(id: string): User {
-    if (!validate(id)) {
-      throw new BadRequestException('Invalid id format. UUID v4 is requested');
-    }
-    const user = users.find((user) => user.id === id);
-    if (!user) {
-      throw new NotFoundException('There is no such user');
-    }
-    return user;
-  }
-
-  private findUserIndexById(id: string): number {
-    const userToDeleteIndex = users.findIndex((user) => user.id === id);
-    if (userToDeleteIndex === -1) {
-      throw new NotFoundException('There is no such user');
-    }
-    return userToDeleteIndex;
-  }
-
   create(createUserDto: CreateUserDto) {
     const user: User = {
       id: v4(),
@@ -50,13 +32,13 @@ export class UserService {
   }
 
   findOne(id: string) {
-    const user = this.findUserById(id);
+    const user = findEntityById(id, users);
 
     return user;
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
-    const user = this.findUserById(id);
+    const user = findEntityById(id, users) as User;
 
     if (updateUserDto.oldPassword !== user.password) {
       throw new ForbiddenException('Incorrect old password');
@@ -69,18 +51,14 @@ export class UserService {
       updatedAt: Date.now(),
     };
 
-    const userIndex = this.findUserIndexById(id);
+    const userIndex = findEntityIndexById(id, users);
     users[userIndex] = editedPasswordUser;
 
     return editedPasswordUser;
   }
 
   remove(id: string) {
-    if (!validate(id)) {
-      throw new BadRequestException('Invalid id format. UUID v4 is requested');
-    }
-
-    const userIndex = this.findUserIndexById(id);
+    const userIndex = findEntityIndexById(id, users);
 
     users.splice(userIndex, 1);
 
