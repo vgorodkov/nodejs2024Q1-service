@@ -19,6 +19,8 @@ npm install
 
 ## Running application
 
+**Create .env file based on .env.example**
+
 ```
 npm start
 ```
