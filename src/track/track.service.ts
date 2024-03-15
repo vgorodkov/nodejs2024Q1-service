@@ -21,12 +21,11 @@ export class TrackService {
   }
 
   async findOne(id: string) {
-    const track = await this.prisma.track.findUnique({ where: { id } });
-    if (!track) {
+    try {
+      return await this.prisma.track.findUniqueOrThrow({ where: { id } });
+    } catch {
       throw new NotFoundException("The track wasn't found");
     }
-
-    return track;
   }
 
   async update(id: string, updateTrackDto: UpdateTrackDto) {

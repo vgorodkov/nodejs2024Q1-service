@@ -24,7 +24,11 @@ export class UserService {
   }
 
   async findAll() {
-    return await this.prisma.user.findMany();
+    try {
+      return await this.prisma.user.findMany();
+    } catch {
+      throw new BadRequestException('Problems with finding all users');
+    }
   }
 
   async findOne(id: string) {
@@ -36,7 +40,9 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const userToUpdate = await this.prisma.user.findUnique({ where: { id } });
+    const userToUpdate = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
     if (!userToUpdate) {
       throw new NotFoundException("The user wasn't found");
@@ -45,6 +51,7 @@ export class UserService {
     if (updateUserDto.oldPassword !== userToUpdate.password) {
       throw new ForbiddenException('Incorrect old password');
     }
+
     const date = new Date();
     const updatedUser = await this.prisma.user.update({
       where: { id },

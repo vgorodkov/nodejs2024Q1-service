@@ -21,15 +21,15 @@ export class AlbumService {
   }
 
   async findOne(id: string) {
-    const album = await this.prisma.album.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!album) {
+    try {
+      return await this.prisma.album.findUniqueOrThrow({
+        where: {
+          id: id,
+        },
+      });
+    } catch {
       throw new NotFoundException("The album wasn't found");
     }
-    return album;
   }
 
   async update(id: string, updateAlbumDto: UpdateAlbumDto) {

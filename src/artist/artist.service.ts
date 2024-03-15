@@ -1,10 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { albums, artists, favs, tracks } from 'src/data/db';
-import { Artist } from './entities/artist.entity';
-import { v4 } from 'uuid';
-import { findEntityById, findEntityIndexById } from 'src/utils/findEntity';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -20,13 +16,11 @@ export class ArtistService {
   }
 
   async findOne(id: string) {
-    const artist = await this.prisma.artist.findUnique({ where: { id } });
-
-    if (!artist) {
+    try {
+      return await this.prisma.artist.findUniqueOrThrow({ where: { id } });
+    } catch {
       throw new NotFoundException("The artist wasn't found");
     }
-
-    return artist;
   }
 
   async update(id: string, updateArtistDto: UpdateArtistDto) {

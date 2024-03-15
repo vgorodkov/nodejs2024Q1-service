@@ -1,17 +1,9 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 
-import { albums, artists, favs, tracks } from 'src/data/db';
-
-import { Track } from 'src/track/entities/track.entity';
-import { Album } from 'src/album/entities/album.entity';
-import { Artist } from 'src/artist/entities/artist.entity';
-
-import { validateId } from 'src/utils/validateId';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -19,26 +11,16 @@ export class FavsService {
   constructor(private prisma: PrismaService) {}
 
   async createTrack(id: string) {
-    const track = await this.prisma.track.findUnique({ where: { id } });
-    if (!track) {
-      throw new UnprocessableEntityException('No such entity');
-    }
-
-    const isFavsExist = !!(await this.prisma.favorites.findFirst());
-    const favorites = await this.prisma.favorites.findMany();
-    const isAlreadyInFavs = favorites[0].tracks.includes(id);
-
-    if (isAlreadyInFavs) {
-      throw new BadRequestException('This entity is already in favourites');
-    }
-
-    if (!isFavsExist) {
-      await this.prisma.favorites.create({
-        data: {
-          tracks: [id],
-        },
+    try {
+      const track = await this.prisma.track.findUniqueOrThrow({
+        where: { id },
       });
-    } else {
+      const favorites = await this.prisma.favorites.findMany();
+      const isAlreadyInFavs = favorites[0].tracks.includes(id);
+
+      if (isAlreadyInFavs) {
+        throw new BadRequestException('This entity is already in favourites');
+      }
       await this.prisma.favorites.updateMany({
         data: {
           tracks: {
@@ -46,9 +28,11 @@ export class FavsService {
           },
         },
       });
-    }
 
-    return track;
+      return track;
+    } catch {
+      throw new UnprocessableEntityException('No such entity');
+    }
   }
 
   async createAlbum(id: string) {
@@ -57,7 +41,6 @@ export class FavsService {
       throw new UnprocessableEntityException('No such entity');
     }
 
-    const isFavsExist = !!(await this.prisma.favorites.findFirst());
     const favorites = await this.prisma.favorites.findMany();
     const isAlreadyInFavs = favorites[0].albums.includes(id);
 
@@ -65,21 +48,13 @@ export class FavsService {
       throw new BadRequestException('This entity is already in favourites');
     }
 
-    if (!isFavsExist) {
-      await this.prisma.favorites.create({
-        data: {
-          albums: [id],
+    await this.prisma.favorites.updateMany({
+      data: {
+        albums: {
+          push: id,
         },
-      });
-    } else {
-      await this.prisma.favorites.updateMany({
-        data: {
-          albums: {
-            push: id,
-          },
-        },
-      });
-    }
+      },
+    });
 
     return album;
   }
@@ -90,7 +65,6 @@ export class FavsService {
       throw new UnprocessableEntityException('No such entity');
     }
 
-    const isFavsExist = !!(await this.prisma.favorites.findFirst());
     const favorites = await this.prisma.favorites.findMany();
     const isAlreadyInFavs = favorites[0].artists.includes(id);
 
@@ -98,21 +72,13 @@ export class FavsService {
       throw new BadRequestException('This entity is already in favourites');
     }
 
-    if (!isFavsExist) {
-      await this.prisma.favorites.create({
-        data: {
-          artists: [id],
+    await this.prisma.favorites.updateMany({
+      data: {
+        artists: {
+          push: id,
         },
-      });
-    } else {
-      await this.prisma.favorites.updateMany({
-        data: {
-          artists: {
-            push: id,
-          },
-        },
-      });
-    }
+      },
+    });
 
     return artist;
   }
