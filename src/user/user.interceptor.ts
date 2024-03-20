@@ -17,7 +17,7 @@ export class UserInterceptor implements NestInterceptor {
         }
 
         if (!Array.isArray(data)) {
-          const { password, ...noPassUser } = data;
+          const { password, ...noPassUser } = data; // eslint-disable-line
           noPassUser.createdAt = new Date(noPassUser.createdAt).getTime();
           noPassUser.updatedAt = new Date(noPassUser.updatedAt).getTime();
 
@@ -25,7 +25,7 @@ export class UserInterceptor implements NestInterceptor {
         }
 
         return data.map((user) => {
-          const { password, ...noPassUser } = user;
+          const { password, ...noPassUser } = user; // eslint-disable-line
           noPassUser.createdAt = new Date(noPassUser.createdAt).getTime();
           noPassUser.updatedAt = new Date(noPassUser.updatedAt).getTime();
 
