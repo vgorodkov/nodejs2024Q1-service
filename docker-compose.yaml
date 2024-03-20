@@ -8,7 +8,6 @@ services:
       - .env
     volumes:
       - .:/app
-      - /app/node_modules
     ports:
       - 4000:4000
     command: npm run start:migrate:dev
@@ -19,7 +18,9 @@ services:
       - mynetwork
   postgres:
     container_name: postgres
-    image: postgres:13.5
+    build:
+      context: .
+      dockerfile: Postgres.Dockerfile
     restart: always
     env_file:
       - .env
