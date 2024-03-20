@@ -6,7 +6,6 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  Body,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { validateId } from 'src/utils/validateId';
