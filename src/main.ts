@@ -5,6 +5,7 @@ import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import * as yaml from 'js-yaml';
 import { join } from 'path';
 import { readFileSync } from 'fs';
+import { initializeFavs } from './utils/initializeFavs';
 
 const PORT = process.env.PORT || 4000;
 
@@ -18,6 +19,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, apiJson);
 
   app.useGlobalPipes(new ValidationPipe());
+  await initializeFavs();
   await app.listen(PORT);
 }
 bootstrap();

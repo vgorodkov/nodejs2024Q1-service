@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  nestapp:
+    container_name: nestapp
+    build: 
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - 4000:4000
+    command: npm run start:migrate:dev
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - mynetwork
+  postgres:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: Postgres.Dockerfile
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - postgres-logs:/var/log/postgresql
+    ports:
+      - '5432:5432'
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  postgres:
+  postgres-logs:
