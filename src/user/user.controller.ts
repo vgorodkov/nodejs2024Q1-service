@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-
   Param,
   Delete,
   UseInterceptors,
@@ -15,6 +14,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserInterceptor } from './user.interceptor';
+import { validateId } from 'src/utils/validateId';
 
 @Controller('user')
 @UseInterceptors(UserInterceptor)
@@ -33,18 +33,20 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    validateId(id);
     return this.userService.findOne(id);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    
+    validateId(id);
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
+    validateId(id);
     return this.userService.remove(id);
   }
 }

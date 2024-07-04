@@ -1,61 +1,77 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { users } from 'src/data/db';
-import { User } from './entities/user.entity';
-import { v4 } from 'uuid';
-import { findEntityById, findEntityIndexById } from 'src/utils/findEntity';
+
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    const user: User = {
-      id: v4(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    users.push(user);
+  constructor(private prisma: PrismaService) {}
 
-    return user;
+  async create(createUserDto: CreateUserDto) {
+    try {
+      return await this.prisma.user.create({
+        data: createUserDto,
+      });
+    } catch (e) {
+      throw new BadRequestException('Incorrect dto');
+    }
   }
 
-  findAll() {
-    return users;
+  async findAll() {
+    try {
+      return await this.prisma.user.findMany();
+    } catch {
+      throw new BadRequestException('Problems with finding all users');
+    }
   }
 
-  findOne(id: string) {
-    const user = findEntityById(id, users);
-
-    return user;
+  async findOne(id: string) {
+    try {
+      return await this.prisma.user.findUniqueOrThrow({ where: { id } });
+    } catch {
+      throw new NotFoundException("The user wasn't found");
+    }
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    const user = findEntityById(id, users) as User;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const userToUpdate = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
-    if (updateUserDto.oldPassword !== user.password) {
+    if (!userToUpdate) {
+      throw new NotFoundException("The user wasn't found");
+    }
+
+    if (updateUserDto.oldPassword !== userToUpdate.password) {
       throw new ForbiddenException('Incorrect old password');
     }
 
-    const editedPasswordUser = {
-      ...user,
-      password: updateUserDto.newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
-    };
+    const date = new Date();
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...userToUpdate,
+        version: userToUpdate.version + 1,
+        updatedAt: date,
+        password: updateUserDto.newPassword,
+      },
+    });
 
-    const userIndex = findEntityIndexById(id, users);
-    users[userIndex] = editedPasswordUser;
-
-    return editedPasswordUser;
+    return updatedUser;
   }
 
-  remove(id: string) {
-    const userIndex = findEntityIndexById(id, users);
-
-    users.splice(userIndex, 1);
+  async remove(id: string) {
+    try {
+      await this.prisma.user.delete({ where: { id } });
+    } catch {
+      throw new NotFoundException("The user wasn't found");
+    }
 
     return;
   }
